@@ -1,0 +1,1692 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 Inventario Chalver - Depósito Drosan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .header p {
+            font-size: 1.3em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 3px solid #e9ecef;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            transform: scale(0);
+            animation: bounceIn 0.8s ease-out forwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.2s; }
+        .stat-card:nth-child(2) { animation-delay: 0.4s; }
+        .stat-card:nth-child(3) { animation-delay: 0.6s; }
+        .stat-card:nth-child(4) { animation-delay: 0.8s; }
+        .stat-card:nth-child(5) { animation-delay: 1.0s; }
+
+        .stat-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-label {
+            color: #6c757d;
+            font-size: 1em;
+            font-weight: 500;
+        }
+
+        .stat-total { color: #2ecc71; }
+        .stat-disponible { color: #3498db; }
+        .stat-poco { color: #f39c12; }
+        .stat-agotado { color: #e74c3c; }
+        .stat-valor { color: #9b59b6; }
+
+        .filters {
+            padding: 30px;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+            text-align: center;
+        }
+
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .filter-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .filter-btn.active {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-todos { background: #3498db; color: white; }
+        .btn-alto { background: #27ae60; color: white; }
+        .btn-medio { background: #f39c12; color: white; }
+        .btn-poco { background: #e67e22; color: white; }
+        .btn-agotado { background: #e74c3c; color: white; }
+
+        .products-container {
+            padding: 30px;
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(50px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .product-card.stock-alto {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #fff, #d5f4e6);
+        }
+
+        .product-card.stock-medio {
+            border-color: #f39c12;
+            background: linear-gradient(135deg, #fff, #fef9e7);
+        }
+
+        .product-card.stock-poco {
+            border-color: #e67e22;
+            background: linear-gradient(135deg, #fff, #fdf2e9);
+            animation: pulse-warning 3s infinite;
+        }
+
+        .product-card.stock-agotado {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, #fff, #fdedec);
+            opacity: 0.7;
+        }
+
+        .stock-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .badge-alto { background: #27ae60; }
+        .badge-medio { background: #f39c12; }
+        .badge-poco { background: #e67e22; animation: blink 2s infinite; }
+        .badge-agotado { background: #e74c3c; }
+
+        .product-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            padding-right: 80px;
+        }
+
+        .product-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            transform: scale(1.05);
+        }
+
+        .precio-info {
+            background: #e8f5e8;
+            border: 1px solid #27ae60;
+        }
+
+        .stock-info {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+        }
+
+        .info-label {
+            font-size: 0.9em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .precio-value { color: #27ae60; }
+        .stock-value { color: #2196f3; }
+
+        .valor-inventario {
+            background: #f3e5f5;
+            border: 1px solid #9c27b0;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .valor-inventario .info-value {
+            color: #9c27b0;
+        }
+
+        .search-container {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 50px 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            color: #6c757d;
+        }
+
+        .footer {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .footer::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .footer h3 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Animaciones */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(255,255,255,0.5); }
+            to { text-shadow: 0 0 30px rgba(255,255,255,0.8); }
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(230, 126, 34, 0.7); }
+            50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(230, 126, 34, 0); }
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2em; }
+            .stats-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+            .product-grid { grid-template-columns: 1fr; }
+            .filter-buttons { flex-direction: column; align-items: center; }
+            .product-info { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 INVENTARIO CHALVER</h1>
+            <p>🏥 Depósito Drosan - Control de Stock Completo</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number stat-total">59</div>
+                <div class="stat-label">Total Productos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number stat-disponible">50</div>
+                <div class="stat-label">Disponibles</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number stat-poco">6</div>
+                <div class="stat-label">Poco Stock</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number stat-agotado">9</div>
+                <div class="stat-label">Agotados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number stat-valor">$3,343,772</div>
+                <div class="stat-label">Valor Total</div>
+            </div>
+        </div>
+
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="🔍 Buscar producto..." id="searchInput">
+                <span class="search-icon">🔍</span>
+            </div>
+        </div>
+
+        <div class="filters">
+            <h3>📊 Filtrar por Stock</h3>
+            <div class="filter-buttons">
+                <button class="filter-btn btn-todos active" data-filter="todos">📋 Todos</button>
+                <button class="filter-btn btn-alto" data-filter="alto">📈 Stock Alto (200+)</button>
+                <button class="filter-btn btn-medio" data-filter="medio">📊 Stock Medio (51-200)</button>
+                <button class="filter-btn btn-poco" data-filter="poco">⚠️ Poco Stock (1-50)</button>
+                <button class="filter-btn btn-agotado" data-filter="agotado">❌ Agotados (0)</button>
+            </div>
+        </div>
+
+        <div class="products-container">
+            <div class="product-grid" id="productGrid">
+
+                <div class="product-card stock-alto" data-category="alto" data-name="zakor 100mg x 6 tbs (mebendazol)">
+                    <div class="stock-badge badge-alto">📈 ALTO (5831)</div>
+                    <div class="product-name">ZAKOR 100MG X 6 TBS (MEBENDAZOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$9,569</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">5831 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$7,368</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="trigentax cr x 20gr (clotrimazol+neomicina+betametasona)">
+                    <div class="stock-badge badge-alto">📈 ALTO (5241)</div>
+                    <div class="product-name">TRIGENTAX CR X 20GR (CLOTRIMAZOL+NEOMICINA+BETAMETASONA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$41,111</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">5241 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$25,324</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="airmax aerosol hfc x 200dosis (salbutamol)">
+                    <div class="stock-badge badge-alto">📈 ALTO (1295)</div>
+                    <div class="product-name">AIRMAX AEROSOL HFC X 200DOSIS (SALBUTAMOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$35,854</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">1295 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$27,608</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="descongelito f gotas x 15ml">
+                    <div class="stock-badge badge-alto">📈 ALTO (1233)</div>
+                    <div class="product-name">DESCONGELITO F GOTAS X 15ML</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$24,575</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">1233 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$18,923</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="fluzetrin f x 10cap (acetaminofen+cetirizina+fenilefrina)">
+                    <div class="stock-badge badge-alto">📈 ALTO (1082)</div>
+                    <div class="product-name">FLUZETRIN F X 10CAP (ACETAMINOFEN+CETIRIZINA+FENILEFRINA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$42,039</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">1082 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$27,838</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="trigentax cr x 40gr (clotrimazol+neomicina+betametasona)">
+                    <div class="stock-badge badge-alto">📈 ALTO (970)</div>
+                    <div class="product-name">TRIGENTAX CR X 40GR (CLOTRIMAZOL+NEOMICINA+BETAMETASONA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$62,941</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">970 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$38,772</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="descongel ls x 100cap">
+                    <div class="stock-badge badge-alto">📈 ALTO (902)</div>
+                    <div class="product-name">DESCONGEL LS X 100CAP</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$180,957</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">902 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$111,470</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="trigentax x 20gr x 3 gts 2 alcohol x 120ml">
+                    <div class="stock-badge badge-alto">📈 ALTO (681)</div>
+                    <div class="product-name">TRIGENTAX X 20GR X 3 GTS 2 ALCOHOL X 120ML</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$123,353</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">681 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$75,985</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="airmax aerosol hfc x 200dosis (1+1) (salbutamol) ">
+                    <div class="stock-badge badge-alto">📈 ALTO (648)</div>
+                    <div class="product-name">AIRMAX AEROSOL HFC X 200DOSIS (1+1) (SALBUTAMOL) </div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$35,856</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">648 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$27,609</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="inflacor ret 6/6mg amp x 2ml (betametasona)">
+                    <div class="stock-badge badge-alto">📈 ALTO (592)</div>
+                    <div class="product-name">INFLACOR RET 6/6MG AMP X 2ML (BETAMETASONA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$76,369</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">592 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$50,572</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="simpause 100mg x 30cbg (isoflavona)">
+                    <div class="stock-badge badge-alto">📈 ALTO (584)</div>
+                    <div class="product-name">SIMPAUSE 100MG X 30CBG (ISOFLAVONA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$128,471</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">584 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$98,923</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="inflacor 4 mg amp x 1ml (betametasona)">
+                    <div class="stock-badge badge-alto">📈 ALTO (525)</div>
+                    <div class="product-name">INFLACOR 4 MG AMP X 1ML (BETAMETASONA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$26,353</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">525 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$20,292</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="inflacor ret 3/3mg amp x 1ml (betametasona)">
+                    <div class="stock-badge badge-alto">📈 ALTO (507)</div>
+                    <div class="product-name">INFLACOR RET 3/3MG AMP X 1ML (BETAMETASONA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$50,039</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">507 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$33,136</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="bifidolac 170mg x 6sob (lactobacilo">
+                    <div class="stock-badge badge-alto">📈 ALTO (430)</div>
+                    <div class="product-name">BIFIDOLAC 170MG X 6SOB (LACTOBACILO</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$85,647</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">430 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$65,948</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="descongel gripa x 10cbg">
+                    <div class="stock-badge badge-alto">📈 ALTO (400)</div>
+                    <div class="product-name">DESCONGEL GRIPA X 10CBG</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$24,000</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">400 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$18,480</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="duopas 400/20mg x 10tbs (ibuprofeno+h.butilbromuro)">
+                    <div class="stock-badge badge-alto">📈 ALTO (388)</div>
+                    <div class="product-name">DUOPAS 400/20MG X 10TBS (IBUPROFENO+H.BUTILBROMURO)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$57,831</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">388 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$44,530</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="neuropron iny 2ml x 3amp">
+                    <div class="stock-badge badge-alto">📈 ALTO (357)</div>
+                    <div class="product-name">NEUROPRON INY 2ML X 3AMP</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$143,843</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">357 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$88,607</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="femtriol cr vag x 20gr (5 aplicador">
+                    <div class="stock-badge badge-alto">📈 ALTO (346)</div>
+                    <div class="product-name">FEMTRIOL CR VAG X 20GR (5 APLICADOR</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$34,419</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">346 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$26,503</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="inflacor 8 mg amp x 2ml (betametasona)">
+                    <div class="stock-badge badge-alto">📈 ALTO (318)</div>
+                    <div class="product-name">INFLACOR 8 MG AMP X 2ML (BETAMETASONA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$45,098</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">318 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$29,864</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="estermax 0.625mg x28tbs (estrogenos conjugados)">
+                    <div class="stock-badge badge-alto">📈 ALTO (294)</div>
+                    <div class="product-name">ESTERMAX 0.625MG X28TBS (ESTROGENOS CONJUGADOS)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$42,039</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">294 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$32,370</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="lactulax x 12s/s (lactulosa)">
+                    <div class="stock-badge badge-alto">📈 ALTO (290)</div>
+                    <div class="product-name">LACTULAX X 12S/S (LACTULOSA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$130,510</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">290 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$100,493</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="trigentax loc top. x 50ml (clotrimazol+neomicina+betametasona)">
+                    <div class="stock-badge badge-alto">📈 ALTO (276)</div>
+                    <div class="product-name">TRIGENTAX LOC TOP. X 50ML (CLOTRIMAZOL+NEOMICINA+BETAMETASONA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$79,059</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">276 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$52,353</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="multidol express 400mg x 48cbg (ibuprofeno)">
+                    <div class="stock-badge badge-alto">📈 ALTO (258)</div>
+                    <div class="product-name">MULTIDOL EXPRESS 400MG X 48CBG (IBUPROFENO)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$79,054</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">258 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$60,872</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="lactulax jbe x240ml (lactulosa)">
+                    <div class="stock-badge badge-alto">📈 ALTO (255)</div>
+                    <div class="product-name">LACTULAX JBE X240ML (LACTULOSA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$133,773</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">255 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$103,005</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="fluturan x 10cbg (ibuprofeno+desloratadina+fenilefrina)">
+                    <div class="stock-badge badge-alto">📈 ALTO (248)</div>
+                    <div class="product-name">FLUTURAN X 10CBG (IBUPROFENO+DESLORATADINA+FENILEFRINA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$44,800</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">248 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$34,496</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="dolfenax 200mg x 10caps (a.tolfenamico)">
+                    <div class="stock-badge badge-alto">📈 ALTO (217)</div>
+                    <div class="product-name">DOLFENAX 200MG X 10CAPS (A.TOLFENAMICO)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$61,020</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">217 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$46,985</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="inflabon 50mcg hfc aerosol (budesonida)">
+                    <div class="stock-badge badge-alto">📈 ALTO (209)</div>
+                    <div class="product-name">INFLABON 50MCG HFC AEROSOL (BUDESONIDA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$155,294</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">209 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$119,576</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-alto" data-category="alto" data-name="estermax 0.625mg cr vag x40gr (estrogenos conjugados)">
+                    <div class="stock-badge badge-alto">📈 ALTO (203)</div>
+                    <div class="product-name">ESTERMAX 0.625MG CR VAG X40GR (ESTROGENOS CONJUGADOS)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$42,298</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">203 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$32,569</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="trigentax cr x 40gr x 2 gts alcohol x 350ml">
+                    <div class="stock-badge badge-medio">📊 MEDIO (198)</div>
+                    <div class="product-name">TRIGENTAX CR X 40GR X 2 GTS ALCOHOL X 350ML</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$125,892</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">198 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$77,549</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="clobezan cr x 25gr (clobetasol)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (197)</div>
+                    <div class="product-name">CLOBEZAN CR X 25GR (CLOBETASOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$56,471</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">197 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$43,483</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="fluzetrin f jbe x 60ml (cetirizina+fenilefrina+acetaminofen)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (185)</div>
+                    <div class="product-name">FLUZETRIN F JBE X 60ML (CETIRIZINA+FENILEFRINA+ACETAMINOFEN)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$44,471</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">185 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$34,243</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="tibonella 2.5mg x 28tbs (tibolona)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (176)</div>
+                    <div class="product-name">TIBONELLA 2.5MG X 28TBS (TIBOLONA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$44,701</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">176 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$34,420</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="terex cr vag x 20gr+3aplicadores (terconazol+dexametasona)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (161)</div>
+                    <div class="product-name">TEREX CR VAG X 20GR+3APLICADORES (TERCONAZOL+DEXAMETASONA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$99,608</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">161 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$76,698</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="clobezan ung x 25gr (clobetasol)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (158)</div>
+                    <div class="product-name">CLOBEZAN UNG X 25GR (CLOBETASOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$72,471</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">158 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$55,803</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="cutamycon 500 x 1cbg (clotrimazol)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (150)</div>
+                    <div class="product-name">CUTAMYCON 500 X 1CBG (CLOTRIMAZOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$52,549</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">150 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$40,463</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="descongel f jbe x 60ml">
+                    <div class="stock-badge badge-medio">📊 MEDIO (141)</div>
+                    <div class="product-name">DESCONGEL F JBE X 60ML</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$24,471</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">141 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$18,843</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="cutamycon cr topica x 20gr (clotrimazol)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (134)</div>
+                    <div class="product-name">CUTAMYCON CR TOPICA X 20GR (CLOTRIMAZOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$20,392</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">134 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$15,702</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="friotan jbe x 120ml">
+                    <div class="stock-badge badge-medio">📊 MEDIO (111)</div>
+                    <div class="product-name">FRIOTAN JBE X 120ML</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$37,647</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">111 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$28,988</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="aspromio aerosol x 200 dosis (b.ipratropio)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (84)</div>
+                    <div class="product-name">ASPROMIO AEROSOL X 200 DOSIS (B.IPRATROPIO)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$28,549</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">84 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$21,983</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="friotan 65mg x 10caps (hedera helix)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (74)</div>
+                    <div class="product-name">FRIOTAN 65MG X 10CAPS (HEDERA HELIX)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$45,333</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">74 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$34,906</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="vaginsol f 100+200mg x 3 ovulos (clindamicina+clotrimazol)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (73)</div>
+                    <div class="product-name">VAGINSOL F 100+200MG X 3 OVULOS (CLINDAMICINA+CLOTRIMAZOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$127,059</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">73 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$97,835</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="vaginsol f cr vag x 20gr+3 aplic. (clindamicina+clotrimazol)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (63)</div>
+                    <div class="product-name">VAGINSOL F CR VAG X 20GR+3 APLIC. (CLINDAMICINA+CLOTRIMAZOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$120,651</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">63 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$92,901</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="inflabon 200mcg hfc aerosol (budesonida)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (63)</div>
+                    <div class="product-name">INFLABON 200MCG HFC AEROSOL (BUDESONIDA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$182,902</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">63 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$140,835</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-medio" data-category="medio" data-name="clobezan locion x 60ml (clobetasol)">
+                    <div class="stock-badge badge-medio">📊 MEDIO (53)</div>
+                    <div class="product-name">CLOBEZAN LOCION X 60ML (CLOBETASOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$87,373</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">53 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$67,277</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-poco" data-category="poco" data-name="multidol express 400mg x 48cbg (2+1) (ibuprofeno)">
+                    <div class="stock-badge badge-poco">⚠️ POCO (44)</div>
+                    <div class="product-name">MULTIDOL EXPRESS 400MG X 48CBG (2+1) (IBUPROFENO)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$158,109</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">44 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$121,744</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-poco" data-category="poco" data-name="desloran jbe 0.05% x 60ml">
+                    <div class="stock-badge badge-poco">⚠️ POCO (29)</div>
+                    <div class="product-name">DESLORAN JBE 0.05% X 60ML</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$101,804</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">29 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$78,389</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-poco" data-category="poco" data-name="busterol aerosol hfc x 200 dosis (budesonida + formoterol fumarato)">
+                    <div class="stock-badge badge-poco">⚠️ POCO (26)</div>
+                    <div class="product-name">BUSTEROL AEROSOL HFC X 200 DOSIS (BUDESONIDA + FORMOTEROL FUMARATO)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$205,012</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">26 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$157,859</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-poco" data-category="poco" data-name="hygienex antipiojos x 24s/s (cipermetrina)">
+                    <div class="stock-badge badge-poco">⚠️ POCO (3)</div>
+                    <div class="product-name">HYGIENEX ANTIPIOJOS X 24S/S (CIPERMETRINA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$67,137</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">3 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$34,636</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-poco" data-category="poco" data-name="fluzetrin f gotas ped x 15ml (cetirizina+fenilefrina+acetaminofen)">
+                    <div class="stock-badge badge-poco">⚠️ POCO (2)</div>
+                    <div class="product-name">FLUZETRIN F GOTAS PED X 15ML (CETIRIZINA+FENILEFRINA+ACETAMINOFEN)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$32,941</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">2 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$25,365</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-poco" data-category="poco" data-name="paraxin 500mg x 6tbs (nitazoxanida)">
+                    <div class="stock-badge badge-poco">⚠️ POCO (1)</div>
+                    <div class="product-name">PARAXIN 500MG X 6TBS (NITAZOXANIDA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$105,412</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">1 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$81,167</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-agotado" data-category="agotado" data-name="cutamycon cr topica x 20gr (1+1) (clotrimazol)">
+                    <div class="stock-badge badge-agotado">❌ AGOTADO</div>
+                    <div class="product-name">CUTAMYCON CR TOPICA X 20GR (1+1) (CLOTRIMAZOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$20,392</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">0 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$15,702</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-agotado" data-category="agotado" data-name="desloran 5 mg x 10tbs">
+                    <div class="stock-badge badge-agotado">❌ AGOTADO</div>
+                    <div class="product-name">DESLORAN 5 MG X 10TBS</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$100,078</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">0 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$77,060</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-agotado" data-category="agotado" data-name="duopas 400/200mg x 10tbs gts 2 usa test ">
+                    <div class="stock-badge badge-agotado">❌ AGOTADO</div>
+                    <div class="product-name">DUOPAS 400/200MG X 10TBS GTS 2 USA TEST </div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$57,851</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">0 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$44,545</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-agotado" data-category="agotado" data-name="multidol 800mg x 30cbg (ibuprofeno)">
+                    <div class="stock-badge badge-agotado">❌ AGOTADO</div>
+                    <div class="product-name">MULTIDOL 800MG X 30CBG (IBUPROFENO)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$100,471</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">0 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$77,363</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-agotado" data-category="agotado" data-name="fynexin gel 5% x 20gr (ibuprofeno)">
+                    <div class="stock-badge badge-agotado">❌ AGOTADO</div>
+                    <div class="product-name">FYNEXIN GEL 5% X 20GR (IBUPROFENO)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$32,118</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">0 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$24,731</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-agotado" data-category="agotado" data-name="neuropron iny x 2ml (unidad)">
+                    <div class="stock-badge badge-agotado">❌ AGOTADO</div>
+                    <div class="product-name">NEUROPRON INY X 2ML (UNIDAD)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$28,235</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">0 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$21,741</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-agotado" data-category="agotado" data-name="neuropron iny 2ml x 3amp (2+1)">
+                    <div class="stock-badge badge-agotado">❌ AGOTADO</div>
+                    <div class="product-name">NEUROPRON INY 2ML X 3AMP (2+1)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$279,216</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">0 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$214,996</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-agotado" data-category="agotado" data-name="paraxin susp x 30ml (nitazoxanida)">
+                    <div class="stock-badge badge-agotado">❌ AGOTADO</div>
+                    <div class="product-name">PARAXIN SUSP X 30ML (NITAZOXANIDA)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$72,471</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">0 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$55,803</div>
+                    </div>
+                </div>
+    
+                <div class="product-card stock-agotado" data-category="agotado" data-name="zakor susp x 30ml (mebendazol)">
+                    <div class="stock-badge badge-agotado">❌ AGOTADO</div>
+                    <div class="product-name">ZAKOR SUSP X 30ML (MEBENDAZOL)</div>
+                    <div class="product-info">
+                        <div class="info-item precio-info">
+                            <div class="info-label">💰 Precio Público</div>
+                            <div class="info-value precio-value">$13,341</div>
+                        </div>
+                        <div class="info-item stock-info">
+                            <div class="info-label">📦 Stock Actual</div>
+                            <div class="info-value stock-value">0 uds</div>
+                        </div>
+                    </div>
+                    <div class="valor-inventario">
+                        <div class="info-label">💎 Valor en Inventario</div>
+                        <div class="info-value">$10,273</div>
+                    </div>
+                </div>
+    
+            </div>
+        </div>
+
+        <div class="footer">
+            <h3>📊 Resumen del Inventario</h3>
+            <p>🏆 Mayor Stock: ZAKOR 100MG X 6 TBS (MEBENDAZOL)... (5831 uds)</p>
+            <p>💎 Mayor Valor: NEUROPRON INY 2ML X 3AMP (2+1)... ($214,996)</p>
+        </div>
+    </div>
+
+    <script>
+        // Filtros de categoría
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const productCards = document.querySelectorAll('.product-card');
+        const searchInput = document.getElementById('searchInput');
+
+        // Función para mostrar productos con animación
+        function showProducts(cardsToShow) {
+            productCards.forEach(card => {
+                card.style.display = 'none';
+                card.classList.remove('visible');
+            });
+
+            let delay = 0;
+            cardsToShow.forEach(card => {
+                setTimeout(() => {
+                    card.style.display = 'block';
+                    setTimeout(() => {
+                        card.classList.add('visible');
+                    }, 50);
+                }, delay);
+                delay += 100;
+            });
+        }
+
+        // Filtros por categoría
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remover clase active de todos los botones
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                // Agregar clase active al botón clickeado
+                button.classList.add('active');
+
+                const filter = button.getAttribute('data-filter');
+                let cardsToShow = [];
+
+                if (filter === 'todos') {
+                    cardsToShow = Array.from(productCards);
+                } else {
+                    cardsToShow = Array.from(productCards).filter(card => 
+                        card.getAttribute('data-category') === filter
+                    );
+                }
+
+                showProducts(cardsToShow);
+            });
+        });
+
+        // Búsqueda en tiempo real
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const activeFilter = document.querySelector('.filter-btn.active').getAttribute('data-filter');
+
+            let cardsToShow = Array.from(productCards).filter(card => {
+                const matchesSearch = card.getAttribute('data-name').includes(searchTerm);
+                const matchesFilter = activeFilter === 'todos' || card.getAttribute('data-category') === activeFilter;
+                return matchesSearch && matchesFilter;
+            });
+
+            showProducts(cardsToShow);
+        });
+
+        // Mostrar todos los productos al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                showProducts(Array.from(productCards));
+            }, 500);
+        });
+
+        // Animación de contadores en estadísticas
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+
+                if (element.textContent.includes('$')) {
+                    element.textContent = '$' + Math.floor(current).toLocaleString();
+                } else {
+                    element.textContent = Math.floor(current);
+                }
+            }, 20);
+        }
+
+        // Iniciar animación de contadores
+        const statNumbers = document.querySelectorAll('.stat-number');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const text = entry.target.textContent;
+                    let target;
+
+                    if (text.includes('$')) {
+                        target = parseInt(text.replace(/[$,]/g, ''));
+                    } else {
+                        target = parseInt(text);
+                    }
+
+                    animateCounter(entry.target, target);
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+
+        statNumbers.forEach(stat => observer.observe(stat));
+    </script>
+</body>
+</html>
