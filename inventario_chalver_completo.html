@@ -1,1023 +1,496 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario DROSAN - Sistema Compacto</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Consulta de Precios - CHALVER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #0f4c75;
-            --secondary: #2c3e50;
-            --accent: #3282b8;
-            --success: #27ae60;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --info: #3498db;
-            --light: #f8fafc;
-            --white: #ffffff;
-            --border: #e2e8f0;
-            --text: #2d3748;
-            --text-muted: #718096;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --radius: 8px;
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+            --success: #4cc9f0;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             --transition: all 0.3s ease;
-            --hover-bg: rgba(50, 130, 184, 0.05);
         }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--light) 0%, #e2e8f0 100%);
-            color: var(--text);
-            font-size: 14px;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: var(--white);
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark);
+            line-height: 1.6;
+            padding: 16px;
             min-height: 100vh;
-            box-shadow: var(--shadow-lg);
         }
-        /* Header Compacto */
-        .header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 1.2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .header h1 {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-        }
-        .header p {
-            font-size: 0.8rem;
-            opacity: 0.9;
-        }
-        .header-info {
-            text-align: right;
-            font-size: 0.75rem;
-            opacity: 0.9;
-        }
-        /* Dashboard Compacto */
-        .dashboard {
-            padding: 1rem;
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 0.7rem;
+
+        .container {
             max-width: 1200px;
             margin: 0 auto;
         }
-        .stat-card {
-            background: linear-gradient(135deg, var(--light) 0%, var(--white) 100%);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 1rem 0.7rem;
+
+        header {
             text-align: center;
-            transition: var(--transition);
+            margin-bottom: 24px;
+            padding: 24px 16px;
+            background: linear-gradient(120deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
             position: relative;
-            cursor: pointer;
+            overflow: hidden;
         }
-        .stat-card::before {
-            content: '';
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+            transform: rotate(30deg);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+            position: relative;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            position: relative;
+        }
+
+        .search-container {
+            margin-bottom: 24px;
+            padding: 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            position: relative;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            font-size: 1rem;
+            border: 2px solid var(--light-gray);
+            border-radius: 50px;
+            outline: none;
+            transition: var(--transition);
+            background-color: var(--light);
+        }
+
+        #searchInput:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .filter-btn {
+            background: var(--light);
+            border: 1px solid var(--light-gray);
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .results-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 8px;
+        }
+
+        .count {
+            font-weight: 600;
+            color: var(--gray);
+        }
+
+        .sort-options {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .sort-select {
+            border: 1px solid var(--light-gray);
+            border-radius: 8px;
+            padding: 6px 10px;
+            background: white;
+            font-size: 0.9rem;
+        }
+
+        #productList {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-card::before {
+            content: "";
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            height: 3px;
-            border-radius: var(--radius) var(--radius) 0 0;
-        }
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-            background: var(--hover-bg);
-        }
-        .stat-card.total::before { background: var(--info); }
-        .stat-card.disponible::before { background: var(--success); }
-        .stat-card.poco::before { background: var(--warning); }
-        .stat-card.agotado::before { background: var(--danger); }
-        .stat-card.valor::before { background: var(--secondary); }
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-            line-height: 1;
-        }
-        .stat-label {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        /* Controles Compactos */
-        .controls {
-            padding: 1rem;
-            background: var(--light);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-        .search-container {
-            position: relative;
             width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
         }
-        .search-input {
-            width: 100%;
-            padding: 0.7rem 2.2rem 0.7rem 0.9rem;
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-            transition: var(--transition);
-        }
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(50, 130, 184, 0.1);
-        }
-        .search-icon {
-            position: absolute;
-            right: 0.9rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-        }
-        .filter-buttons {
-            display: flex;
-            gap: 0.4rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .filter-btn {
-            padding: 0.4rem 0.8rem;
-            border: 2px solid transparent;
-            border-radius: var(--radius);
-            font-weight: 600;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: var(--transition);
-            background: var(--white);
-            color: var(--text);
-            text-transform: uppercase;
-        }
-        .filter-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-        .btn-todos { border-color: var(--info); }
-        .btn-todos.active { background: var(--info); color: white; }
-        .btn-alto { border-color: var(--success); }
-        .btn-alto.active { background: var(--success); color: white; }
-        .btn-medio { border-color: var(--warning); }
-        .btn-medio.active { background: var(--warning); color: white; }
-        .btn-poco { border-color: #e67e22; }
-        .btn-poco.active { background: #e67e22; color: white; }
-        .btn-agotado { border-color: var(--danger); }
-        .btn-agotado.active { background: var(--danger); color: white; }
-        /* Información de Resultados */
-        .results-info {
-            padding: 0.8rem 1rem;
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-            font-weight: 600;
-            color: var(--primary);
-            text-align: center;
-            font-size: 0.85rem;
-        }
-        /* Tabla Principal */
-        .table-container {
-            padding: 1rem;
-            overflow-x: auto;
-        }
-        .products-table {
-            width: 100%;
-            border-collapse: collapse;
-            border-radius: var(--radius);
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            background: var(--white);
-            font-size: 0.8rem;
-        }
-        .products-table thead {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-        }
-        .products-table th {
-            padding: 0.8rem;
-            text-align: left;
-            font-weight: 600;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 2px solid rgba(255,255,255,0.2);
-            cursor: pointer;
-            user-select: none;
-            position: relative;
-        }
-        .products-table th i {
-            margin-right: 0.3rem;
-        }
-        .products-table th .sort-icon {
-            position: absolute;
-            right: 0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0.7;
-            transition: var(--transition);
-        }
-        .products-table th:hover .sort-icon {
-            opacity: 1;
-        }
-        .products-table th.asc .sort-icon { transform: translateY(-50%) rotate(180deg); }
-        .products-table tbody tr {
-            transition: var(--transition);
-            border-bottom: 1px solid var(--border);
-        }
-        .products-table tbody tr:hover {
-            background: var(--hover-bg);
-        }
-        .products-table tbody tr.hidden {
-            display: none;
-        }
-        .products-table td {
-            padding: 0.8rem;
-            vertical-align: middle;
-        }
+
         .product-name {
             font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--dark);
+            flex-grow: 1;
+            font-size: 0.95rem;
+        }
+
+        .price-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .product-price {
+            font-size: 1.4rem;
+            font-weight: 700;
             color: var(--primary);
-            line-height: 1.3;
-            font-size: 0.85rem;
         }
-        .stock {
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-        .price {
-            font-weight: 700;
-            color: var(--success);
-            font-size: 0.9rem;
-        }
-        .status-badge {
-            padding: 0.2rem 0.6rem;
-            border-radius: var(--radius);
+
+        .cop-badge {
+            background: var(--success);
+            color: white;
+            font-size: 0.7rem;
+            padding: 3px 8px;
+            border-radius: 20px;
             font-weight: 600;
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: white;
-            display: inline-block;
         }
-        .badge-alto { background: var(--success); }
-        .badge-medio { background: var(--warning); }
-        .badge-poco { background: #e67e22; }
-        .badge-agotado { background: var(--danger); }
-        /* Sin Resultados */
+
         .no-results {
+            grid-column: 1 / -1;
             text-align: center;
-            padding: 2rem;
-            color: var(--text-muted);
-            display: none;
+            padding: 60px 20px;
+            color: var(--gray);
         }
+
         .no-results i {
-            font-size: 2rem;
-            margin-bottom: 0.8rem;
-            opacity: 0.5;
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.3;
         }
-        /* Footer Compacto */
-        .footer {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            padding: 1.2rem;
-            text-align: center;
-        }
-        .footer h3 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-        }
-        .footer-stats {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.8rem;
-        }
-        .footer-stat {
-            background: rgba(255,255,255,0.1);
-            padding: 0.8rem;
-            border-radius: var(--radius);
-            font-size: 0.75rem;
-        }
-        /* Responsive Mejorado */
+
         @media (max-width: 768px) {
-            .header {
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .results-info {
                 flex-direction: column;
-                text-align: center;
-                padding: 1rem;
+                align-items: flex-start;
+                gap: 12px;
             }
-            .header h1 {
-                font-size: 1.3rem;
+            
+            #productList {
+                grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
             }
-            .controls {
-                padding: 0.9rem;
-            }
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            }
-            .products-table {
-                font-size: 0.7rem;
-            }
-            .products-table th,
-            .products-table td {
-                padding: 0.6rem;
-            }
-            .product-name {
-                font-size: 0.75rem;
+            
+            .filters {
+                justify-content: center;
             }
         }
+
         @media (max-width: 480px) {
-            .header {
-                padding: 0.8rem;
+            body {
+                padding: 12px;
             }
-            .header h1 {
-                font-size: 1.1rem;
+            
+            header {
+                padding: 20px 16px;
             }
-            .header p {
-                font-size: 0.7rem;
-            }
-            .dashboard {
-                padding: 0.8rem;
-            }
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.5rem;
-            }
-            .stat-card {
-                padding: 0.7rem 0.5rem;
-            }
-            .stat-number {
-                font-size: 1.3rem;
-            }
-            .stat-label {
-                font-size: 0.65rem;
-            }
-            .controls {
-                padding: 0.8rem;
-            }
-            .filter-btn {
-                padding: 0.3rem 0.6rem;
-                font-size: 0.65rem;
-            }
-            .table-container {
-                padding: 0.8rem;
-            }
-            .products-table {
-                font-size: 0.65rem;
-            }
-            .products-table th,
-            .products-table td {
-                padding: 0.5rem;
-            }
-            .product-name {
-                font-size: 0.7rem;
-            }
-            .footer {
-                padding: 1rem;
-            }
-            .footer h3 {
-                font-size: 1rem;
-            }
-            .footer-stat {
-                font-size: 0.7rem;
-                padding: 0.7rem;
+            
+            h1 {
+                font-size: 1.4rem;
             }
         }
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            height: 6px;
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--light);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--accent);
-            border-radius: 3px;
+
+        .highlight {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <div>
-                <h1><i class="fas fa-warehouse"></i> INVENTARIO DROSAN</h1>
-                <p>Sistema de Control de Stock - Depósito DROSAN</p>
-            </div>
-            <div class="header-info">
-                <div><i class="fas fa-building"></i> Depósito DROSAN</div>
-                <div id="currentDateTime"><i class="fas fa-clock"></i> Cargando...</div>
-            </div>
+        <header>
+            <h1><i class="fas fa-prescription-bottle-alt"></i> Consulta de Precios CHALVER</h1>
+            <p class="subtitle">Productos Farmacéuticos - Precios en COP</p>
         </header>
-        <!-- Dashboard -->
-        <section class="dashboard">
-            <div class="stats-grid">
-                <div class="stat-card total" id="statTotal">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label"><i class="fas fa-boxes"></i> Total</div>
-                </div>
-                <div class="stat-card disponible" id="statDisponible">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label"><i class="fas fa-check-circle"></i> Disponibles</div>
-                </div>
-                <div class="stat-card poco" id="statCritico">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label"><i class="fas fa-exclamation-triangle"></i> Crítico</div>
-                </div>
-                <div class="stat-card agotado" id="statAgotado">
-                    <div class="stat-number">0</div>
-                    <div class="stat-label"><i class="fas fa-times-circle"></i> Agotado</div>
-                </div>
-                <div class="stat-card valor" id="statValor">
-                    <div class="stat-number">$0</div>
-                    <div class="stat-label"><i class="fas fa-dollar-sign"></i> Valor Total</div>
-                </div>
+        
+        <div class="search-container">
+            <div class="search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="searchInput" placeholder="Buscar producto...">
             </div>
-        </section>
-        <!-- Controles -->
-        <section class="controls">
-            <div class="search-container">
-                <input type="text" class="search-input" placeholder="Buscar productos..." id="searchInput">
-                <span class="search-icon"><i class="fas fa-search"></i></span>
+            
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all">Todos</button>
+                <button class="filter-btn" data-filter="medicamento">Medicamentos</button>
+                <button class="filter-btn" data-filter="aerosol">Aerosoles</button>
+                <button class="filter-btn" data-filter="crema">Cremas/Ungüentos</button>
             </div>
-            <div class="filter-buttons">
-                <button class="filter-btn btn-todos active" data-filter="todos">Todos</button>
-                <button class="filter-btn btn-alto" data-filter="alto">Alto</button>
-                <button class="filter-btn btn-medio" data-filter="medio">Medio</button>
-                <button class="filter-btn btn-poco" data-filter="poco">Crítico</button>
-                <button class="filter-btn btn-agotado" data-filter="agotado">Agotado</button>
-            </div>
-        </section>
-        <!-- Información de Resultados -->
-        <div class="results-info" id="resultsInfo">
-            <i class="fas fa-info-circle"></i> Mostrando 0 productos
         </div>
-        <!-- Tabla -->
-        <section class="table-container">
-            <table class="products-table">
-                <thead>
-                    <tr>
-                        <th data-sort="product-name" data-order="asc"><i class="fas fa-tag"></i> Producto <i class="fas fa-sort sort-icon"></i></th>
-                        <th data-sort="stock" data-order="asc"><i class="fas fa-cube"></i> Stock <i class="fas fa-sort sort-icon"></i></th>
-                        <th data-sort="price" data-order="asc"><i class="fas fa-dollar-sign"></i> Precio <i class="fas fa-sort sort-icon"></i></th>
-                        <th data-sort="status" data-order="asc"><i class="fas fa-signal"></i> Estado <i class="fas fa-sort sort-icon"></i></th>
-                    </tr>
-                </thead>
-                <tbody id="productTableBody">
-                    <tr data-category="alto" data-search="zakor 100mg x 6 tbs (mebendazol)">
-                        <td class="product-name">ZAKOR 100MG X 6 TBS (MEBENDAZOL)</td>
-                        <td class="stock">5831</td>
-                        <td class="price">$7,368.13</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="trigentax cr x 20gr (clotrimazol+neomicina+betametasona)">
-                        <td class="product-name">TRIGENTAX CR X 20GR (CLOTRIMAZOL+NEOMICINA+BETAMETASONA)</td>
-                        <td class="stock">5241</td>
-                        <td class="price">$25,324.38</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="airmax aerosol hfc x 200dosis (salbutamol)">
-                        <td class="product-name">AIRMAX AEROSOL HFC X 200DOSIS (SALBUTAMOL)</td>
-                        <td class="stock">1295</td>
-                        <td class="price">$27,607.58</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="descongelito f gotas x 15ml">
-                        <td class="product-name">DESCONGELITO F GOTAS X 15ML</td>
-                        <td class="stock">1233</td>
-                        <td class="price">$18,922.75</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="fluzetrin f x 10cap (acetaminofen+cetirizina+fenilefrina)">
-                        <td class="product-name">FLUZETRIN F X 10CAP (ACETAMINOFEN+CETIRIZINA+FENILEFRINA)</td>
-                        <td class="stock">1082</td>
-                        <td class="price">$27,838.23</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="trigentax cr x 40gr (clotrimazol+neomicina+betametasona)">
-                        <td class="product-name">TRIGENTAX CR X 40GR (CLOTRIMAZOL+NEOMICINA+BETAMETASONA)</td>
-                        <td class="stock">970</td>
-                        <td class="price">$38,771.66</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="descongel ls x 100cap">
-                        <td class="product-name">DESCONGEL LS X 100CAP</td>
-                        <td class="stock">902</td>
-                        <td class="price">$111,469.51</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="trigentax x 20gr x 3 gts 2 alcohol x 120ml">
-                        <td class="product-name">TRIGENTAX X 20GR X 3 GTS 2 ALCOHOL X 120ML</td>
-                        <td class="stock">681</td>
-                        <td class="price">$75,985.45</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="airmax aerosol hfc x 200dosis (1+1) (salbutamol)">
-                        <td class="product-name">AIRMAX AEROSOL HFC X 200DOSIS (1+1) (SALBUTAMOL)</td>
-                        <td class="stock">648</td>
-                        <td class="price">$27,609.12</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="inflacor ret 6/6mg amp x 2ml (betametasona)">
-                        <td class="product-name">INFLACOR RET 6/6MG AMP X 2ML (BETAMETASONA)</td>
-                        <td class="stock">592</td>
-                        <td class="price">$50,571.55</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="simpause 100mg x 30cbg (isoflavona)">
-                        <td class="product-name">SIMPAUSE 100MG X 30CBG (ISOFLAVONA)</td>
-                        <td class="stock">584</td>
-                        <td class="price">$98,922.67</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="inflacor 4 mg amp x 1ml (betametasona)">
-                        <td class="product-name">INFLACOR 4 MG AMP X 1ML (BETAMETASONA)</td>
-                        <td class="stock">525</td>
-                        <td class="price">$20,291.81</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="inflacor ret 3/3mg amp x 1ml (betametasona)">
-                        <td class="product-name">INFLACOR RET 3/3MG AMP X 1ML (BETAMETASONA)</td>
-                        <td class="stock">507</td>
-                        <td class="price">$33,135.83</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="bifidolac 170mg x 6sob (lactobacilo)">
-                        <td class="product-name">BIFIDOLAC 170MG X 6SOB (LACTOBACILO)</td>
-                        <td class="stock">430</td>
-                        <td class="price">$65,948.19</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="descongel gripa x 10cbg">
-                        <td class="product-name">DESCONGEL GRIPA X 10CBG</td>
-                        <td class="stock">400</td>
-                        <td class="price">$18,480.00</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="duopas 400/20mg x 10tbs (ibuprofeno+h.butilbromuro)">
-                        <td class="product-name">DUOPAS 400/20MG X 10TBS (IBUPROFENO+H.BUTILBROMURO)</td>
-                        <td class="stock">388</td>
-                        <td class="price">$44,529.87</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="neuropron iny 2ml x 3amp">
-                        <td class="product-name">NEUROPRON INY 2ML X 3AMP</td>
-                        <td class="stock">357</td>
-                        <td class="price">$88,607.29</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="femtriol cr vag x 20gr (5 aplicador)">
-                        <td class="product-name">FEMTRIOL CR VAG X 20GR (5 APLICADOR)</td>
-                        <td class="stock">346</td>
-                        <td class="price">$26,502.63</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="alto" data-search="inflacor 8 mg amp x 2ml (betametasona)">
-                        <td class="product-name">INFLACOR 8 MG AMP X 2ML (BETAMETASONA)</td>
-                        <td class="stock">318</td>
-                        <td class="price">$29,863.90</td>
-                        <td><span class="status-badge badge-alto">Alto</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="estermax 0.625mg x28tbs (estrogenos conjugados)">
-                        <td class="product-name">ESTERMAX 0.625MG X28TBS (ESTROGENOS CONJUGADOS)</td>
-                        <td class="stock">294</td>
-                        <td class="price">$32,370.03</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="lactulax x 12s/s (lactulosa)">
-                        <td class="product-name">LACTULAX X 12S/S (LACTULOSA)</td>
-                        <td class="stock">290</td>
-                        <td class="price">$100,492.70</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="trigentax loc top. x 50ml (clotrimazol+neomicina+betametasona)">
-                        <td class="product-name">TRIGENTAX LOC TOP. X 50ML (CLOTRIMAZOL+NEOMICINA+BETAMETASONA)</td>
-                        <td class="stock">276</td>
-                        <td class="price">$52,352.87</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="multidol express 400mg x 48cbg (ibuprofeno)">
-                        <td class="product-name">MULTIDOL EXPRESS 400MG X 48CBG (IBUPROFENO)</td>
-                        <td class="stock">258</td>
-                        <td class="price">$60,871.58</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="lactulax jbe x240ml (lactulosa)">
-                        <td class="product-name">LACTULAX JBE X240ML (LACTULOSA)</td>
-                        <td class="stock">255</td>
-                        <td class="price">$103,005.21</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="fluturan x 10cbg (ibuprofeno+desloratadina+fenilefrina)">
-                        <td class="product-name">FLUTURAN X 10CBG (IBUPROFENO+DESLORATADINA+FENILEFRINA)</td>
-                        <td class="stock">248</td>
-                        <td class="price">$34,496.00</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="dolfenax 200mg x 10caps (a.tolfenamico)">
-                        <td class="product-name">DOLFENAX 200MG X 10CAPS (A.TOLFENAMICO)</td>
-                        <td class="stock">217</td>
-                        <td class="price">$46,985.40</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="inflabon 50mcg hfc aerosol (budesonida)">
-                        <td class="product-name">INFLABON 50MCG HFC AEROSOL (BUDESONIDA)</td>
-                        <td class="stock">209</td>
-                        <td class="price">$119,576.38</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="estermax 0.625mg cr vag x40gr (estrogenos conjugados)">
-                        <td class="product-name">ESTERMAX 0.625MG CR VAG X40GR (ESTROGENOS CONJUGADOS)</td>
-                        <td class="stock">203</td>
-                        <td class="price">$32,569.46</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="trigentax cr x 40gr x 2 gts alcohol x 350ml">
-                        <td class="product-name">TRIGENTAX CR X 40GR X 2 GTS ALCOHOL X 350ML</td>
-                        <td class="stock">198</td>
-                        <td class="price">$77,549.47</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="clobezan cr x 25gr (clobetasol)">
-                        <td class="product-name">CLOBEZAN CR X 25GR (CLOBETASOL)</td>
-                        <td class="stock">197</td>
-                        <td class="price">$43,482.67</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="fluzetrin f jbe x 60ml (cetirizina+fenilefrina+acetaminofen)">
-                        <td class="product-name">FLUZETRIN F JBE X 60ML (CETIRIZINA+FENILEFRINA+ACETAMINOFEN)</td>
-                        <td class="stock">185</td>
-                        <td class="price">$34,242.67</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="tibonella 2.5mg x 28tbs (tibolona)">
-                        <td class="product-name">TIBONELLA 2.5MG X 28TBS (TIBOLONA)</td>
-                        <td class="stock">176</td>
-                        <td class="price">$34,419.77</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="terex cr vag x 20gr+3aplicadores (terconazol+dexametasona)">
-                        <td class="product-name">TEREX CR VAG X 20GR+3APLICADORES (TERCONAZOL+DEXAMETASONA)</td>
-                        <td class="stock">161</td>
-                        <td class="price">$76,698.16</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="clobezan ung x 25gr (clobetasol)">
-                        <td class="product-name">CLOBEZAN UNG X 25GR (CLOBETASOL)</td>
-                        <td class="stock">158</td>
-                        <td class="price">$55,802.67</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="cutamycon 500 x 1cbg (clotrimazol)">
-                        <td class="product-name">CUTAMYCON 500 X 1CBG (CLOTRIMAZOL)</td>
-                        <td class="stock">150</td>
-                        <td class="price">$40,462.73</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="descongel f jbe x 60ml">
-                        <td class="product-name">DESCONGEL F JBE X 60ML</td>
-                        <td class="stock">141</td>
-                        <td class="price">$18,842.67</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="cutamycon cr topica x 20gr (clotrimazol)">
-                        <td class="product-name">CUTAMYCON CR TOPICA X 20GR (CLOTRIMAZOL)</td>
-                        <td class="stock">134</td>
-                        <td class="price">$15,701.84</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="medio" data-search="friotan jbe x 120ml">
-                        <td class="product-name">FRIOTAN JBE X 120ML</td>
-                        <td class="stock">111</td>
-                        <td class="price">$28,988.19</td>
-                        <td><span class="status-badge badge-medio">Medio</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="aspromio aerosol x 200 dosis (b.ipratropio)">
-                        <td class="product-name">ASPROMIO AEROSOL X 200 DOSIS (B.IPRATROPIO)</td>
-                        <td class="stock">84</td>
-                        <td class="price">$21,982.73</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="friotan 65mg x 10caps (hedera helix)">
-                        <td class="product-name">FRIOTAN 65MG X 10CAPS (HEDERA HELIX)</td>
-                        <td class="stock">74</td>
-                        <td class="price">$34,906.41</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="vaginsol f 100+200mg x 3 ovulos (clindamicina+clotrimazol)">
-                        <td class="product-name">VAGINSOL F 100+200MG X 3 OVULOS (CLINDAMICINA+CLOTRIMAZOL)</td>
-                        <td class="stock">73</td>
-                        <td class="price">$97,835.43</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="vaginsol f cr vag x 20gr+3 aplic. (clindamicina+clotrimazol)">
-                        <td class="product-name">VAGINSOL F CR VAG X 20GR+3 APLIC. (CLINDAMICINA+CLOTRIMAZOL)</td>
-                        <td class="stock">63</td>
-                        <td class="price">$92,901.27</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="inflabon 200mcg hfc aerosol (budesonida)">
-                        <td class="product-name">INFLABON 200MCG HFC AEROSOL (BUDESONIDA)</td>
-                        <td class="stock">63</td>
-                        <td class="price">$140,834.54</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="clobezan locion x 60ml (clobetasol)">
-                        <td class="product-name">CLOBEZAN LOCION X 60ML (CLOBETASOL)</td>
-                        <td class="stock">53</td>
-                        <td class="price">$67,277.21</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="multidol express 400mg x 48cbg (2+1) (ibuprofeno)">
-                        <td class="product-name">MULTIDOL EXPRESS 400MG X 48CBG (2+1) (IBUPROFENO)</td>
-                        <td class="stock">44</td>
-                        <td class="price">$121,743.93</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="desloran jbe 0.05% x 60ml">
-                        <td class="product-name">DESLORAN JBE 0.05% X 60ML</td>
-                        <td class="stock">29</td>
-                        <td class="price">$78,389.08</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="busterol aerosol hfc x 200 dosis (budesonida + formoterol fumarato)">
-                        <td class="product-name">BUSTEROL AEROSOL HFC X 200 DOSIS (BUDESONIDA + FORMOTEROL FUMARATO)</td>
-                        <td class="stock">26</td>
-                        <td class="price">$157,859.24</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="hygienex antipiojos x 24s/s (cipermetrina)">
-                        <td class="product-name">HYGIENEX ANTIPIOJOS X 24S/S (CIPERMETRINA)</td>
-                        <td class="stock">3</td>
-                        <td class="price">$34,635.98</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="fluzetrin f gotas ped x 15ml (cetirizina+fenilefrina+acetaminofen)">
-                        <td class="product-name">FLUZETRIN F GOTAS PED X 15ML (CETIRIZINA+FENILEFRINA+ACETAMINOFEN)</td>
-                        <td class="stock">2</td>
-                        <td class="price">$25,364.57</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="poco" data-search="paraxin 500mg x 6tbs (nitazoxanida)">
-                        <td class="product-name">PARAXIN 500MG X 6TBS (NITAZOXANIDA)</td>
-                        <td class="stock">1</td>
-                        <td class="price">$81,167.24</td>
-                        <td><span class="status-badge badge-poco">Crítico</span></td>
-                    </tr>
-                    <tr data-category="agotado" data-search="cutamycon cr topica x 20gr (1+1) (clotrimazol)">
-                        <td class="product-name">CUTAMYCON CR TOPICA X 20GR (1+1) (CLOTRIMAZOL)</td>
-                        <td class="stock">0</td>
-                        <td class="price">$15,701.84</td>
-                        <td><span class="status-badge badge-agotado">Agotado</span></td>
-                    </tr>
-                    <tr data-category="agotado" data-search="desloran 5 mg x 10tbs">
-                        <td class="product-name">DESLORAN 5 MG X 10TBS</td>
-                        <td class="stock">0</td>
-                        <td class="price">$77,060.06</td>
-                        <td><span class="status-badge badge-agotado">Agotado</span></td>
-                    </tr>
-                    <tr data-category="agotado" data-search="duopas 400/200mg x 10tbs gts 2 usa test">
-                        <td class="product-name">DUOPAS 400/200MG X 10TBS GTS 2 USA TEST</td>
-                        <td class="stock">0</td>
-                        <td class="price">$44,545.27</td>
-                        <td><span class="status-badge badge-agotado">Agotado</span></td>
-                    </tr>
-                    <tr data-category="agotado" data-search="fynexin gel 5% x 20gr (ibuprofeno)">
-                        <td class="product-name">FYNEXIN GEL 5% X 20GR (IBUPROFENO)</td>
-                        <td class="stock">0</td>
-                        <td class="price">$24,730.86</td>
-                        <td><span class="status-badge badge-agotado">Agotado</span></td>
-                    </tr>
-                    <tr data-category="agotado" data-search="multidol 800mg x 30cbg (ibuprofeno)">
-                        <td class="product-name">MULTIDOL 800MG X 30CBG (IBUPROFENO)</td>
-                        <td class="stock">0</td>
-                        <td class="price">$77,362.67</td>
-                        <td><span class="status-badge badge-agotado">Agotado</span></td>
-                    </tr>
-                    <tr data-category="agotado" data-search="neuropron iny 2ml x 3amp (2+1)">
-                        <td class="product-name">NEUROPRON INY 2ML X 3AMP (2+1)</td>
-                        <td class="stock">0</td>
-                        <td class="price">$214,996.32</td>
-                        <td><span class="status-badge badge-agotado">Agotado</span></td>
-                    </tr>
-                    <tr data-category="agotado" data-search="neuropron iny x 2ml (unidad)">
-                        <td class="product-name">NEUROPRON INY X 2ML (UNIDAD)</td>
-                        <td class="stock">0</td>
-                        <td class="price">$21,740.95</td>
-                        <td><span class="status-badge badge-agotado">Agotado</span></td>
-                    </tr>
-                    <tr data-category="agotado" data-search="paraxin susp x 30ml (nitazoxanida)">
-                        <td class="product-name">PARAXIN SUSP X 30ML (NITAZOXANIDA)</td>
-                        <td class="stock">0</td>
-                        <td class="price">$55,802.67</td>
-                        <td><span class="status-badge badge-agotado">Agotado</span></td>
-                    </tr>
-                    <tr data-category="agotado" data-search="zakor susp x 30ml (mebendazol)">
-                        <td class="product-name">ZAKOR SUSP X 30ML (MEBENDAZOL)</td>
-                        <td class="stock">0</td>
-                        <td class="price">$10,272.57</td>
-                        <td><span class="status-badge badge-agotado">Agotado</span></td>
-                    </tr>
-                </tbody>
-            </table>
-            <div class="no-results" id="noResults">
-                <i class="fas fa-search-minus"></i>
-                <div>No se encontraron productos</div>
+        
+        <div class="results-info">
+            <div class="count" id="resultsCount">Mostrando todos los productos</div>
+            <div class="sort-options">
+                <label for="sortSelect">Ordenar:</label>
+                <select class="sort-select" id="sortSelect">
+                    <option value="name-asc">Nombre (A-Z)</option>
+                    <option value="name-desc">Nombre (Z-A)</option>
+                    <option value="price-asc">Precio (Menor a Mayor)</option>
+                    <option value="price-desc">Precio (Mayor a Menor)</option>
+                </select>
             </div>
-        </section>
-        <!-- Footer -->
-        <footer class="footer">
-            <h3><i class="fas fa-chart-bar"></i> Resumen DROSAN</h3>
-            <div class="footer-stats">
-                <div class="footer-stat" id="footerMayorStock">
-                    <strong><i class="fas fa-trophy"></i> Mayor Stock:</strong><br>
-                    Cargando...
-                </div>
-                <div class="footer-stat" id="footerPrecioAlto">
-                    <strong><i class="fas fa-gem"></i> Precio Más Alto:</strong><br>
-                    Cargando...
-                </div>
-                <div class="footer-stat" id="footerCritico">
-                    <strong><i class="fas fa-exclamation-triangle"></i> Atención:</strong><br>
-                    Cargando...
-                </div>
-            </div>
-        </footer>
+        </div>
+        
+        <div id="productList"></div>
     </div>
+
     <script>
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        const productRows = Array.from(document.querySelectorAll('#productTableBody tr'));
+        // Datos del archivo Excel con precios en COP
+        const products = [
+            { name: "AIRMAX AEROSOL HFC X 200DOSIS (1+1) (SALBUTAMOL)", price: 27609.12, category: "aerosol" },
+            { name: "AIRMAX AEROSOL HFC X 200DOSIS (SALBUTAMOL)", price: 27607.58, category: "aerosol" },
+            { name: "ASPROPIO AEROSOL X 200 DOSIS (B.IPRATROPIO)", price: 21982.73, category: "aerosol" },
+            { name: "BIFIDOLAC 170MG X 6SOB (LACTOBACILO)", price: 65948.19, category: "medicamento" },
+            { name: "BUSTEROL AEROSOL HFC X 200 DOSIS (BUDESONIDA + FORMOTEROL FUMARATO))", price: 157859.24, category: "aerosol" },
+            { name: "CLOBEZAN CR X 25GR (CLOBETASOL)", price: 43482.67, category: "crema" },
+            { name: "CLOBEZAN LOCION X 60ML (CLOBETASOL)", price: 67277.21, category: "crema" },
+            { name: "CLOBEZAN UNG X 25GR (CLOBETASOL)", price: 55802.67, category: "crema" },
+            { name: "CUTAMYCON 500 X 1CBG (CLOTRIMAZOL)", price: 36416.46, category: "medicamento" },
+            { name: "CUTAMYCON CR TOPICA X 20GR (CLOTRIMAZOL)", price: 14131.66, category: "crema" },
+            { name: "DESCONGEL F JBE X 60ML", price: 13914.33, category: "medicamento" },
+            { name: "DESCONGEL GRIPA X 10CBG", price: 16632.00, category: "medicamento" },
+            { name: "DESCONGEL LS X 100CAP", price: 98093.17, category: "medicamento" },
+            { name: "DESCONGELITO F GOTAS X 15ML", price: 12110.56, category: "medicamento" },
+            { name: "DESLORAN 5 MG X 10TBS", price: 79355.43, category: "medicamento" },
+            { name: "DESLORAN JBE 0.05% X 60ML", price: 78389.08, category: "medicamento" },
+            { name: "DOLFENAX 200MG X 10CAPS (A.TOLFENAMICO)", price: 46985.40, category: "medicamento" },
+            { name: "DUOPAS 400/20MG X 10TBS (IBUPROFENO+H.BUTILBROMURO)", price: 44529.87, category: "medicamento" },
+            { name: "ESTERMAX 0.625MG CR VAG X40GR (ESTROGENOS CONJUGADOS)", price: 32569.46, category: "crema" },
+            { name: "ESTERMAX 0.625MG X28TBS (ESTROGENOS CONJUGADOS)", price: 32370.03, category: "medicamento" },
+            { name: "FEMTRIOL CR VAG X 20GR (5 APLICADOR)", price: 26502.63, category: "crema" },
+            { name: "FLUTURAN X 10CBG (IBUPROFENO+DESLORATADINA+FENILEFRINA)", price: 35510.86, category: "medicamento" },
+            { name: "FLUZETRIN F GOTAS PED X 15ML (CETIRIZINA+FENILEFRINA+ACETAMINOFEN)", price: 24241.14, category: "medicamento" },
+            { name: "FLUZETRIN F JBE X 60ML (CETIRIZINA+FENILEFRINA+ACETAMINOFEN)", price: 31742.17, category: "medicamento" },
+            { name: "FLUZETRIN F X 10CAP (ACETAMINOFEN+CETIRIZINA+FENILEFRINA)", price: 29133.03, category: "medicamento" },
+            { name: "FRIOTAN 65MG X 10CAPS (HEDERA HELIX)", price: 34906.41, category: "medicamento" },
+            { name: "FRIOTAN JBE X 120ML", price: 28988.19, category: "medicamento" },
+            { name: "FYNEXIN GEL 5% X 20GR (IBUPROFENO)", price: 24730.86, category: "crema" },
+            { name: "HYGIENEX ANTIPIOJOS X 24S/S (CIPERMETRINA)", price: 51695.49, category: "medicamento" },
+            { name: "INFLABON 200MCG HFC AEROSOL (BUDESONIDA)", price: 126751.09, category: "aerosol" },
+            { name: "INFLABON 50MCG HFC AEROSOL (BUDESONIDA)", price: 107618.74, category: "aerosol" },
+            { name: "INFLACOR 4 MG AMP X 1ML (BETAMETASONA)", price: 18262.63, category: "medicamento" },
+            { name: "INFLACOR 8 MG AMP X 2ML (BETAMETASONA)", price: 29074.29, category: "medicamento" },
+            { name: "INFLACOR RET 3/3MG AMP X 1ML (BETAMETASONA)", price: 33374.88, category: "medicamento" },
+            { name: "INFLACOR RET 6/6MG AMP X 2ML (BETAMETASONA)", price: 45514.40, category: "medicamento" },
+            { name: "LACTULAX JBE X240ML (LACTULOSA)", price: 92704.69, category: "medicamento" },
+            { name: "LACTULAX X 12S/S (LACTULOSA)", price: 90443.43, category: "medicamento" },
+            { name: "MULTIDOL 800MG X 30CBG (IBUPROFENO)", price: 74463.54, category: "medicamento" },
+            { name: "MULTIDOL EXPRESS 400MG X 48CBG (2+1) (IBUPROFENO)", price: 121743.93, category: "medicamento" },
+            { name: "MULTIDOL EXPRESS 400MG X 48CBG (IBUPROFENO)", price: 54784.42, category: "medicamento" },
+            { name: "NEUROPRON INY 2ML X 3AMP", price: 79746.56, category: "medicamento" },
+            { name: "NEUROPRON INY X 2ML (UNIDAD)", price: 21088.68, category: "medicamento" },
+            { name: "PARAXIN 500MG X 6TBS (NITAZOXANIDA)", price: 81167.24, category: "medicamento" },
+            { name: "PARAXIN SUSP X 30ML (NITAZOXANIDA)", price: 55802.67, category: "medicamento" },
+            { name: "SIMPAUSE 100MG X 30CBG (ISOFLAVONA)", price: 98922.67, category: "medicamento" },
+            { name: "TEREX CR VAG X 20GR+3APLICADORES (TERCONAZOL+DEXAMETASONA)", price: 76698.16, category: "crema" },
+            { name: "TIBONELLA 2.5MG X 28TBS (TIBOLONA)", price: 37563.68, category: "medicamento" },
+            { name: "TRIGENTAX CR X 20GR (CLOTRIMAZOL+NEOMICINA+BETAMETASONA)", price: 22032.21, category: "crema" },
+            { name: "TRIGENTAX CR X 40GR (CLOTRIMAZOL+NEOMICINA+BETAMETASONA)", price: 35728.18, category: "crema" },
+            { name: "TRIGENTAX CR X 40GR X 2 GTS ALCOHOL X 350ML", price: 67468.04, category: "crema" },
+            { name: "TRIGENTAX LOC TOP. X 50ML (CLOTRIMAZOL+NEOMICINA+BETAMETASONA)", price: 45547.00, category: "crema" },
+            { name: "TRIGENTAX X 20GR X 3 GTS 2 ALCOHOL X 120ML", price: 66107.34, category: "crema" },
+            { name: "VAGINSOL F 100+200MG X 3 OVULOS (CLINDAMICINA+CLOTRIMAZOL)", price: 97835.43, category: "medicamento" },
+            { name: "VAGINSOL F CR VAG X 20GR+3 APLIC. (CLINDAMICINA+CLOTRIMAZOL)", price: 92901.27, category: "crema" },
+            { name: "ZAKOR 100MG X 6 TBS (MEBENDAZOL)", price: 6631.32, category: "medicamento" },
+            { name: "ZAKOR SUSP X 30ML (MEBENDAZOL)", price: 10272.57, category: "medicamento" }
+        ].map(product => ({
+            ...product,
+            name: product.name.toUpperCase()
+        }));
+
+        const productList = document.getElementById('productList');
         const searchInput = document.getElementById('searchInput');
-        const resultsInfo = document.getElementById('resultsInfo');
-        const noResults = document.getElementById('noResults');
-        const currentDateTime = document.getElementById('currentDateTime');
-        const tableHeaders = document.querySelectorAll('.products-table th[data-sort]');
-        const statTotal = document.getElementById('statTotal').querySelector('.stat-number');
-        const statDisponible = document.getElementById('statDisponible').querySelector('.stat-number');
-        const statCritico = document.getElementById('statCritico').querySelector('.stat-number');
-        const statAgotado = document.getElementById('statAgotado').querySelector('.stat-number');
-        const statValor = document.getElementById('statValor').querySelector('.stat-number');
-        const footerMayorStock = document.getElementById('footerMayorStock');
-        const footerPrecioAlto = document.getElementById('footerPrecioAlto');
-        const footerCritico = document.getElementById('footerCritico');
-        let currentFilter = 'todos';
-        let currentSearch = '';
-        let sortColumn = 'product-name';
-        let sortOrder = 'asc';
-        // Función para formatear fecha y hora actual
-        function updateDateTime() {
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            currentDateTime.innerHTML = `<i class="fas fa-clock"></i> ${day}/${month}/${year} ${hours}:${minutes}`;
+        const resultsCount = document.getElementById('resultsCount');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const sortSelect = document.getElementById('sortSelect');
+
+        let currentFilter = 'all';
+        let currentSort = 'name-asc';
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(price);
         }
-        // Calcular estadísticas dinámicamente
-        function calculateStats() {
-            let totalProducts = 0;
-            let disponibles = 0;
-            let criticos = 0;
-            let agotados = 0;
-            let totalValue = 0;
-            let maxStock = { name: '', stock: 0 };
-            let maxPrice = { name: '', price: 0 };
-            productRows.forEach(row => {
-                const stock = parseInt(row.querySelector('.stock').textContent, 10);
-                const priceStr = row.querySelector('.price').textContent.replace('$', '').replace(/,/g, '');
-                const price = parseFloat(priceStr);
-                const name = row.querySelector('.product-name').textContent;
-                const category = row.getAttribute('data-category');
-                totalProducts++;
-                totalValue += price;
-                if (stock > 0) disponibles++;
-                if (category === 'poco') criticos++;
-                if (category === 'agotado') agotados++;
-                if (stock > maxStock.stock) {
-                    maxStock = { name, stock };
-                }
-                if (price > maxPrice.price) {
-                    maxPrice = { name, price };
+
+        function highlightText(text, searchTerm) {
+            if (!searchTerm) return text;
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            return text.replace(regex, '<span class="highlight">$1</span>');
+        }
+
+        function renderProducts(productsToRender) {
+            productList.innerHTML = '';
+            
+            if (productsToRender.length === 0) {
+                productList.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>No se encontraron productos</h3>
+                        <p>Intenta con otro término de búsqueda</p>
+                    </div>
+                `;
+                resultsCount.textContent = '0 productos encontrados';
+                return;
+            }
+            
+            resultsCount.textContent = `${productsToRender.length} producto(s) encontrado(s)`;
+            
+            productsToRender.forEach(product => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const highlightedName = highlightText(product.name, searchTerm);
+                
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                
+                productCard.innerHTML = `
+                    <div class="product-name">${highlightedName}</div>
+                    <div class="price-container">
+                        <div class="product-price">${formatPrice(product.price)}</div>
+                        <div class="cop-badge">COP</div>
+                    </div>
+                `;
+                
+                productList.appendChild(productCard);
+            });
+        }
+
+        function sortProducts(productsArray, sortOption) {
+            return [...productsArray].sort((a, b) => {
+                switch(sortOption) {
+                    case 'name-asc':
+                        return a.name.localeCompare(b.name);
+                    case 'name-desc':
+                        return b.name.localeCompare(a.name);
+                    case 'price-asc':
+                        return a.price - b.price;
+                    case 'price-desc':
+                        return b.price - a.price;
+                    default:
+                        return 0;
                 }
             });
-            statTotal.textContent = totalProducts;
-            statDisponible.textContent = disponibles;
-            statCritico.textContent = criticos;
-            statAgotado.textContent = agotados;
-            statValor.textContent = `$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`;
-            footerMayorStock.innerHTML = `<strong><i class="fas fa-trophy"></i> Mayor Stock:</strong><br>${maxStock.name} (${maxStock.stock} unidades)`;
-            footerPrecioAlto.innerHTML = `<strong><i class="fas fa-gem"></i> Precio Más Alto:</strong><br>${maxPrice.name} ($${maxPrice.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`;
-            footerCritico.innerHTML = `<strong><i class="fas fa-exclamation-triangle"></i> Atención:</strong><br>${criticos} productos en estado crítico (stock < 100)`;
         }
-        // Función para actualizar información de resultados
-        function updateResultsInfo(count) {
-            resultsInfo.innerHTML = '<i class="fas fa-info-circle"></i> Mostrando ' + count + ' productos';
-        }
-        // Función para ordenar filas
-        function sortProducts() {
-            productRows.sort((a, b) => {
-                let valA, valB;
-                if (sortColumn === 'product-name') {
-                    valA = a.querySelector('.product-name').textContent.toLowerCase();
-                    valB = b.querySelector('.product-name').textContent.toLowerCase();
-                } else if (sortColumn === 'stock') {
-                    valA = parseInt(a.querySelector('.stock').textContent, 10);
-                    valB = parseInt(b.querySelector('.stock').textContent, 10);
-                } else if (sortColumn === 'price') {
-                    valA = parseFloat(a.querySelector('.price').textContent.replace('$', '').replace(/,/g, ''));
-                    valB = parseFloat(b.querySelector('.price').textContent.replace('$', '').replace(/,/g, ''));
-                } else if (sortColumn === 'status') {
-                    valA = a.querySelector('.status-badge').textContent.toLowerCase();
-                    valB = b.querySelector('.status-badge').textContent.toLowerCase();
-                }
-                if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
-                if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
-                return 0;
-            });
-            const tbody = document.getElementById('productTableBody');
-            productRows.forEach(row => tbody.appendChild(row));
-        }
-        // Función para filtrar y mostrar productos
+
         function filterProducts() {
-            let visibleCount = 0;
-            productRows.forEach(row => {
-                const matchesFilter = currentFilter === 'todos' || row.getAttribute('data-category') === currentFilter;
-                const searchText = row.getAttribute('data-search') || '';
-                const matchesSearch = currentSearch === '' || searchText.includes(currentSearch.toLowerCase());
-                if (matchesFilter && matchesSearch) {
-                    row.classList.remove('hidden');
-                    visibleCount++;
-                } else {
-                    row.classList.add('hidden');
-                }
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            let filteredProducts = products.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm);
+                const matchesFilter = currentFilter === 'all' || product.category === currentFilter;
+                return matchesSearch && matchesFilter;
             });
-            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-            updateResultsInfo(visibleCount);
+            
+            filteredProducts = sortProducts(filteredProducts, currentSort);
+            renderProducts(filteredProducts);
         }
-        // Eventos para filtros
+
+        // Event listeners
+        searchInput.addEventListener('input', filterProducts);
+        
         filterButtons.forEach(button => {
             button.addEventListener('click', () => {
                 filterButtons.forEach(btn => btn.classList.remove('active'));
                 button.classList.add('active');
-                currentFilter = button.getAttribute('data-filter');
+                currentFilter = button.dataset.filter;
                 filterProducts();
             });
         });
-        // Evento para búsqueda con debounce
-        let debounceTimer;
-        searchInput.addEventListener('input', (e) => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                currentSearch = e.target.value.trim();
-                filterProducts();
-            }, 300);
+        
+        sortSelect.addEventListener('change', (e) => {
+            currentSort = e.target.value;
+            filterProducts();
         });
-        // Eventos para ordenamiento
-        tableHeaders.forEach(header => {
-            header.addEventListener('click', () => {
-                const column = header.getAttribute('data-sort');
-                const order = header.getAttribute('data-order') === 'asc' ? 'desc' : 'asc';
-                tableHeaders.forEach(h => {
-                    h.setAttribute('data-order', 'asc');
-                    h.classList.remove('asc', 'desc');
-                });
-                header.setAttribute('data-order', order);
-                header.classList.add(order);
-                sortColumn = column;
-                sortOrder = order;
-                sortProducts();
-                filterProducts(); // Reaplicar filtro después de ordenar
-            });
-        });
-        // Inicializar
-        updateDateTime();
-        calculateStats();
-        sortProducts();
-        filterProducts();
+
+        // Renderizar todos los productos al cargar la página
+        renderProducts(sortProducts(products, currentSort));
     </script>
 </body>
 </html>
